@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/* AegisAI global design tokens */
+:root {
+  /* Dark mode is the default */
+  --color-background: #0b0f2a; /* Deep Navy */
+  --color-foreground: #e5e7eb;
+
+  --color-surface: #111c44; /* Midnight Blue */
+  --color-surface-muted: #1a2758;
+
+  --color-primary: #6c3bff; /* Electric Purple */
+  --color-primary-soft: #9f7aea; /* Soft Violet */
+
+  --color-accent-green: #22c55e;
+  --color-accent-amber: #fbbf24;
+  --color-accent-red: #ef4444;
+
+  --color-border-subtle: rgba(148, 163, 184, 0.4);
+  --color-border-strong: rgba(148, 163, 184, 0.8);
+
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/* Light mode overrides */
+[data-theme="light"] {
+  --color-background: #f9fafb;
+  --color-foreground: #020617;
+
+  --color-surface: #ffffff;
+  --color-surface-muted: #e5e7eb;
+
+  --color-border-subtle: rgba(148, 163, 184, 0.35);
+  --color-border-strong: rgba(15, 23, 42, 0.9);
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+
+  --color-primary: var(--color-primary);
+  --color-primary-soft: var(--color-primary-soft);
+
+  --color-accent-green: var(--color-accent-green);
+  --color-accent-amber: var(--color-accent-amber);
+  --color-accent-red: var(--color-accent-red);
+
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-strong: var(--color-border-strong);
+
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+.glass-panel {
+  @apply bg-surface/70 border border-border-subtle backdrop-blur-xl;
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.65),
+    inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+.glass-panel-soft {
+  @apply bg-surface-muted/70 border border-border-subtle backdrop-blur-xl;
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.5),
+    inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+}
+
+.pill {
+  border-radius: var(--radius-full);
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(108, 59, 255, 0.9),
+    rgba(159, 122, 234, 0.8),
+    rgba(56, 189, 248, 0.8)
+  );
+  opacity: 0.8;
+  z-index: -1;
+}
+
+.grid-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.grid-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

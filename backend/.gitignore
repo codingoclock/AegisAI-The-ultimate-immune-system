@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+.venv/
+.env
+.env/
+
+# OS files
+.DS_Store
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+*.log
+.cache/
+
+# Testing & type checking
+.pytest_cache/
+.mypy_cache/
+
+# IDEs
+.idea/
+.vscode/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# Model files and datasets
+models/
+data/
