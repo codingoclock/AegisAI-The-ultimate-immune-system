@@ -10,7 +10,7 @@ const heroStats = [
 
 export default function Home() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-[#050716] via-[#050716] to-[#0b0f2a] text-foreground">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-background to-surface text-foreground">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-40 top-[-140px] h-80 w-80 rounded-full bg-primary/25 blur-[80px]" />
         <div className="absolute right-[-120px] top-40 h-72 w-72 rounded-full bg-primary-soft/30 blur-[80px]" />
@@ -20,7 +20,7 @@ export default function Home() {
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="gradient-border rounded-2xl bg-surface p-[1px]">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary-soft to-sky-400 shadow-[0_18px_45px_rgba(15,23,42,0.9)]">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary-soft to-sky-400 shadow-lg">
               <span className="absolute h-9 w-9 animate-ping rounded-2xl bg-primary/35" />
               <Shield className="relative h-5 w-5 text-white" />
             </div>
@@ -64,7 +64,7 @@ export default function Home() {
 
         <Link
           href="/dashboard"
-          className="pill hidden items-center gap-2 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-50 ring-1 ring-slate-700/80 backdrop-blur-lg transition hover:bg-slate-900 hover:ring-primary/70 sm:flex"
+          className="pill hidden items-center gap-2 bg-surface/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground ring-1 ring-border-subtle backdrop-blur-lg transition hover:bg-surface hover:ring-primary/70 sm:flex"
         >
           Launch Console
           <ArrowRight className="h-3.5 w-3.5" />
@@ -94,14 +94,14 @@ export default function Home() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
             <Link
               href="/dashboard"
-              className="pill inline-flex items-center justify-center gap-2 bg-primary px-5 py-2.5 text-sm font-semibold text-slate-50 shadow-[0_18px_38px_rgba(88,28,135,0.55)] transition hover:bg-primary-soft"
+              className="pill inline-flex items-center justify-center gap-2 bg-primary px-5 py-2.5 text-sm font-semibold text-foreground shadow-lg transition hover:bg-primary-soft"
             >
               Launch Live Dashboard
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/architecture"
-              className="pill inline-flex items-center justify-center gap-2 border border-border-subtle bg-slate-900/40 px-4 py-2.5 text-xs font-medium text-slate-200 backdrop-blur-md transition hover:border-primary/70 hover:text-primary-soft"
+              className="pill inline-flex items-center justify-center gap-2 border border-border-subtle bg-surface/40 px-4 py-2.5 text-xs font-medium text-foreground backdrop-blur-md transition hover:border-primary/70 hover:text-primary-soft"
             >
               View Architecture Diagram
             </Link>

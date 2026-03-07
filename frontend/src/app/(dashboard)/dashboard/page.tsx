@@ -123,7 +123,7 @@ export default function DashboardPage() {
             </span>
             Live ingest
           </span>
-          <span className="pill border border-slate-700/80 bg-slate-900/40 px-2.5 py-1 text-[11px] text-slate-300">
+          <span className="pill border border-border-subtle bg-surface/40 px-2.5 py-1 text-[11px] text-foreground">
             Synthetic data · FastAPI connected later
           </span>
         </div>

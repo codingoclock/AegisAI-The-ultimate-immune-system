@@ -9,6 +9,7 @@ import {
   Legend,
 } from "recharts";
 import { SectionHeader } from "@/components/ui/section-header";
+import { useTheme } from "@/components/layout/theme-provider";
 
 type Slice = {
   name: string;
@@ -24,6 +25,15 @@ type Props = {
 const COLORS = ["#6C3BFF", "#9F7AEA", "#22C55E", "#FBBF24", "#EF4444"];
 
 export function PieCard({ title, subtitle, data }: Props) {
+  const { theme } = useTheme();
+  
+  const strokeColor = theme === "dark" ? "rgba(15,23,42,0.9)" : "rgba(200,200,220,0.4)";
+  const tooltipBg = theme === "dark" ? "#020617" : "#ffffff";
+  const tooltipBorder = theme === "dark" ? "rgba(148,163,184,0.5)" : "rgba(148,163,184,0.3)";
+  const tooltipTextColor = theme === "dark" ? "#e5e7eb" : "#020617";
+  const tooltipItemColor = theme === "dark" ? "#9f7aea" : "#6c3bff";
+  const legendTextColor = theme === "dark" ? "rgba(148,163,184,0.9)" : "rgba(15,23,42,0.7)";
+  
   return (
     <div className="glass-panel h-72 w-full px-4 py-3.5">
       <SectionHeader title={title} subtitle={subtitle} />
@@ -40,25 +50,25 @@ export function PieCard({ title, subtitle, data }: Props) {
               <Cell
                 key={entry.name}
                 fill={COLORS[index % COLORS.length]}
-                stroke="rgba(15,23,42,0.9)"
+                stroke={strokeColor}
               />
             ))}
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#020617",
+              backgroundColor: tooltipBg,
               borderRadius: 12,
-              border: "1px solid rgba(148,163,184,0.5)",
+              border: `1px solid ${tooltipBorder}`,
               padding: "8px 10px",
             }}
-            labelStyle={{ color: "#e5e7eb", fontSize: 11 }}
-            itemStyle={{ color: "#9f7aea", fontSize: 11 }}
+            labelStyle={{ color: tooltipTextColor, fontSize: 11 }}
+            itemStyle={{ color: tooltipItemColor, fontSize: 11 }}
           />
           <Legend
             verticalAlign="bottom"
             height={24}
             formatter={(value) => (
-              <span style={{ color: "rgba(148,163,184,0.9)", fontSize: 11 }}>
+              <span style={{ color: legendTextColor, fontSize: 11 }}>
                 {value}
               </span>
             )}

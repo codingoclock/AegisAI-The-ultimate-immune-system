@@ -23,6 +23,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { useTheme } from "@/components/layout/theme-provider";
 import { runImageInference, InferenceResponse } from "@/lib/api";
 
 const staticEpsilonCurve = [
@@ -69,6 +70,7 @@ export default function ModelSecurityPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inference, setInference] = useState<InferenceResponse | null>(null);
+  const { theme } = useTheme();
 
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -129,7 +131,7 @@ export default function ModelSecurityPage() {
           </p>
         </div>
         <div className="flex gap-2 text-xs">
-          <span className="pill border border-slate-700/80 bg-slate-900/40 px-2.5 py-1 text-[11px] text-slate-300">
+          <span className="pill border border-border-subtle bg-surface/40 px-2.5 py-1 text-[11px] text-foreground">
             Backend: FastAPI · PyTorch · ART
           </span>
         </div>
@@ -142,7 +144,7 @@ export default function ModelSecurityPage() {
             subtitle="Drag an image to simulate clean vs adversarial predictions."
             icon={<UploadCloud className="h-4 w-4" />}
             rightSlot={
-              <span className="pill bg-slate-900/70 px-2.5 py-1 text-[11px] text-slate-300">
+              <span className="pill bg-surface/70 px-2.5 py-1 text-[11px] text-foreground">
                 {isLoading ? "Running..." : "Live inference"}
               </span>
             }
@@ -267,8 +269,8 @@ export default function ModelSecurityPage() {
                   className={[
                     "pill px-2.5 py-1 text-[11px] font-medium",
                     attackType === "FGSM"
-                      ? "bg-primary/80 text-slate-50"
-                      : "bg-slate-900/70 text-slate-300",
+                      ? "bg-primary/80 text-foreground"
+                      : "bg-surface/70 text-foreground",
                   ].join(" ")}
                 >
                   FGSM
@@ -279,8 +281,8 @@ export default function ModelSecurityPage() {
                   className={[
                     "pill px-2.5 py-1 text-[11px] font-medium",
                     attackType === "PGD"
-                      ? "bg-primary/80 text-slate-50"
-                      : "bg-slate-900/70 text-slate-300",
+                      ? "bg-primary/80 text-foreground"
+                      : "bg-surface/70 text-foreground",
                   ].join(" ")}
                 >
                   PGD
@@ -345,12 +347,12 @@ export default function ModelSecurityPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#020617",
+                    backgroundColor: theme === "dark" ? "#020617" : "#ffffff",
                     borderRadius: 12,
-                    border: "1px solid rgba(148,163,184,0.5)",
+                    border: theme === "dark" ? "1px solid rgba(148,163,184,0.5)" : "1px solid rgba(148,163,184,0.3)",
                     padding: "8px 10px",
                   }}
-                  labelStyle={{ color: "#e5e7eb", fontSize: 11 }}
+                  labelStyle={{ color: theme === "dark" ? "#e5e7eb" : "#020617", fontSize: 11 }}
                   itemStyle={{ fontSize: 11 }}
                 />
                 <Line
@@ -405,13 +407,13 @@ export default function ModelSecurityPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#020617",
+                    backgroundColor: theme === "dark" ? "#020617" : "#ffffff",
                     borderRadius: 12,
-                    border: "1px solid rgba(148,163,184,0.5)",
+                    border: theme === "dark" ? "1px solid rgba(148,163,184,0.5)" : "1px solid rgba(148,163,184,0.3)",
                     padding: "8px 10px",
                   }}
-                  labelStyle={{ color: "#e5e7eb", fontSize: 11 }}
-                  itemStyle={{ color: "#9f7aea", fontSize: 11 }}
+                  labelStyle={{ color: theme === "dark" ? "#e5e7eb" : "#020617", fontSize: 11 }}
+                  itemStyle={{ color: theme === "dark" ? "#9f7aea" : "#6c3bff", fontSize: 11 }}
                   formatter={(value: number) => [
                     `${(value as number).toFixed(1)}%`,
                     "Probability",

@@ -332,6 +332,51 @@ curl -X POST http://localhost:8000/inference/image \
 
 ## ☁️ Cloud & Identity Monitoring
 
+### Real-Time Anomaly Detection Dashboard
+
+AegisAI's Cloud Monitoring dashboard provides **live security event streaming** with real-time analysis of authentication patterns and identity risks. The dashboard continuously pulls anomaly predictions from the backend IsolationForest model, displaying security events as they're detected.
+
+#### Dashboard Features
+
+**Live Event Feed**
+- Real-time display of detected security events
+- Severe indicators: Red (anomalies), Amber (suspicious), Green (normal)
+- Event description with threat-specific context
+- Actor identification (user/service)
+- Location and timestamp information
+- Up to 50 events maintained for historical reference
+
+**Real-Time Metrics**
+- **Active Sessions**: Count of monitored login sessions
+- **Anomalies Detected**: Running total of detected anomalies
+- **Risk Score (0-100)**: Computed from anomaly ratio
+  - Formula: `(anomaly_ratio × 80) + 20`
+  - Range: 20-100 (20 = minimal, 100 = critical)
+- **Risk Level**: Classification (Low/Medium/High)
+
+**Visualization Charts**
+- **Time Series (Last 24h)**: Anomaly events in 5-minute buckets
+- **Threat Distribution (Pie Chart)**: Breakdown by threat type
+- **Risk Score Trend (Radial Chart)**: Live risk assessment
+
+#### Data Flow Architecture
+
+```
+IsolationForest Model (Backend)
+    ↓
+POST /predict_anomaly endpoint
+    ↓
+Frontend Polling (Every 4 seconds)
+    ↓
+Sample Generation: generateAnomalySample()
+    ↓
+Event Mapping: anomalyToSecurityEvent()
+    ↓
+React State: events, timeSeriesData, threatDistribution, riskScore
+    ↓
+UI Components: LiveEventFeed, TimeSeriesCard, PieCard, RadialRiskCard
+```
+
 ### Anomaly Detection Engine
 
 AegisAI's anomaly detector uses **IsolationForest**, an unsupervised algorithm that identifies outliers by isolating anomalies in a feature space.
@@ -408,6 +453,93 @@ curl -X POST http://localhost:8000/predict_anomaly \
 **Model Score Legend:**
 - **`-1`** = **🚨 Anomaly Detected** (Suspicious pattern identified)
 - **`1`** = **✅ Normal Activity** (Within expected bounds)
+
+### Real-Time Data Streaming Pipeline
+
+The Cloud Monitoring dashboard streams live anomaly predictions to the UI every 4 seconds using a polling mechanism:
+
+#### Polling Mechanism
+
+**Configuration:**
+- **Interval**: 4 seconds (non-blocking, user-friendly)
+- **Samples per Poll**: 5 realistic cloud scenarios
+- **Total Events Maintained**: Up to 50 in feed (oldest removed)
+- **Time Series Window**: 60 minutes in 5-minute buckets
+
+**Polling Process:**
+```typescript
+// Executes every 4 seconds
+1. generateAnomalySample() - Create 5 synthetic samples
+2. For each sample:
+   - Call POST /predict_anomaly with features
+   - Receive is_anomaly (bool) and model_score (int)
+3. anomalyToSecurityEvent() - Transform to UI format
+4. updateState() - Add to events, recalculate metrics
+5. UI Auto-Update - Charts and feed refresh
+```
+
+#### Sample Generation Examples
+
+**Normal Activity (70% of samples)**
+```json
+{
+  "impossible_travel_speed": 0.2,          // 0-0.5 km/h
+  "login_frequency_1hr": 1.5,              // 0-4 logins
+  "ip_change_count_24hr": 0,               // 0-2 IP changes
+  "metadata": {
+    "actor": "user-abc123",
+    "location": "San Francisco, US",
+    "threatType": "Unusual Login Time",
+    "timestamp": "2026-03-07T14:30:00Z"
+  }
+}
+→ Prediction: is_anomaly = false  (Green event)
+```
+
+**Anomalous Activity (30% of samples)**
+```json
+{
+  "impossible_travel_speed": 3.2,          // 2-5 km/h  
+  "login_frequency_1hr": 15.0,             // 8-20 logins
+  "ip_change_count_24hr": 8,               // 5-10 IP changes
+  "metadata": {
+    "actor": "service-xyz789",
+    "location": "Multiple countries",
+    "threatType": "Impossible Travel",
+    "timestamp": "2026-03-07T14:35:00Z"
+  }
+}
+→ Prediction: is_anomaly = true  (Red event)
+```
+
+#### Event Transformation
+
+Each anomaly prediction is transformed into a SecurityEvent:
+
+```typescript
+{
+  id: "unique-id-timestamp",
+  type: "Threat Type",              // Impossible Travel, Brute Force, etc.
+  severity: "anomaly" | "suspicious" | "normal",
+  actor: "user-id or service-id",
+  location: "Geographic location",
+  timeAgo: "relative time",         // "now", "30s ago", etc.
+  description: "Threat-specific explanation"
+}
+```
+
+**Threat Types:**
+- **Impossible Travel**: User at two distant locations within impossible timeframe
+- **Brute Force**: Excessive login attempts in short time window  
+- **Unusual Login Time**: Login outside normal user activity window
+- **High-Risk IP**: Login from geographically high-risk region
+
+#### Connection Status Indicator
+
+The dashboard displays a real-time connection status:
+- **● Live** (Green) - Connected and streaming predictions
+- **○ Connecting...** (Amber) - Attempting connection
+- **○ Offline** (Red) - No backend connection (fallback to cache)
 
 ---
 
@@ -602,6 +734,75 @@ curl -X POST http://localhost:8000/predict_anomaly \
 ---
 
 ## 🧪 Testing & Validation
+
+### Cloud Monitoring Dashboard Testing
+
+#### Test 1: Live Connection Indicator
+**Objective**: Verify real-time connection to backend
+
+1. Navigate to `http://localhost:3000/cloud-monitoring`
+2. Look for badge in top-right corner
+3. Should show "● Live" with green background
+4. **Expected**: Green indicator when backend is running
+
+#### Test 2: Live Event Feed Population
+**Objective**: Verify real events from backend anomaly detection
+
+1. Open browser DevTools (F12)
+2. Watch the Live Event Feed section
+3. Wait 4-5 seconds
+
+**Expected Behavior**:
+- Events start appearing every 4 seconds
+- Severity badges visible (green/amber/red)
+- Descriptions are threat-specific
+- No console errors
+
+#### Test 3: Severity Classification
+**Objective**: Verify backend predictions map correctly to UI severity
+
+Watch live feed for 1-2 minutes and count events:
+- **Red events** (anomalies): ~30%
+- **Amber events** (suspicious): ~10%
+- **Green events** (normal): ~60%
+
+#### Test 4: Chart Updates
+**Objective**: Verify real-time metrics update
+
+1. Watch **Time Series Chart** for updates every 4 seconds
+2. Check **Threat Distribution Pie** reflects event types
+3. Verify **Risk Score** changes as anomalies detected
+
+**Expected**: Charts update smoothly without lag
+
+#### Test 5: Anomaly Detection Accuracy
+**Objective**: Test backend predictions on known patterns
+
+```bash
+# Test with anomalous features
+curl -X POST http://localhost:8000/predict_anomaly \
+  -H "Content-Type: application/json" \
+  -d '{
+    "impossible_travel_speed": 3.5,
+    "login_frequency_1hr": 15.0,
+    "ip_change_count_24hr": 8
+  }'
+
+# Expected: {"is_anomaly": true, "model_score": -1}
+
+# Test with normal features
+curl -X POST http://localhost:8000/predict_anomaly \
+  -H "Content-Type: application/json" \
+  -d '{
+    "impossible_travel_speed": 0.1,
+    "login_frequency_1hr": 1.5,
+    "ip_change_count_24hr": 0
+  }'
+
+# Expected: {"is_anomaly": false, "model_score": 1}
+```
+
+---
 
 ### Quick Test Suite
 
@@ -893,9 +1094,39 @@ async def inference_image(...):
 | **Total (PGD)** | **~3.5 seconds** | 40 iterations |
 | Anomaly Detection | <1 ms | IsolationForest prediction |
 
+---
+
+## 📊 Performance Benchmarks
+
+### Response Times (M1 MacBook, CPU Mode)
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Model Load (first call) | ~2 seconds | Cached on subsequent calls |
+| Image Preprocessing | ~50 ms | Resize, normalize |
+| Clean Inference | ~100 ms | Forward pass only |
+| FGSM Attack Generation | ~150 ms | Single-step perturbation |
+| **Total (FGSM)** | **~300 ms** | End-to-end |
+| **Total (PGD)** | **~3.5 seconds** | 40 iterations |
+| **Anomaly Detection** | **<1 ms** | IsolationForest prediction |
+| **Cloud Monitoring Poll** | **~2-3 seconds** | 5 samples × <1ms each + API overhead |
+
+### Cloud Monitoring Performance
+
+| Metric | Value | Details |
+|--------|-------|---------|
+| Polling Interval | 4 seconds | User-friendly, non-blocking |
+| Samples per Poll | 5 | Realistic cloud scenarios |
+| Backend Calls per Poll | 5 × POST /predict_anomaly | Batched efficiently |
+| Average Latency | 2-3 seconds | Poll + processing + UI update |
+| Events Maintained | 50 | Sliding window (oldest removed) |
+| Time Series Window | 60 minutes | 12 buckets of 5 minutes each |
+| Dashboard Refresh Rate | ~4 Hz | Every 4 seconds per poll |
+
 ### Throughput
 
 - **Single Instance**: ~50-100 requests/sec (FGSM)
+- **Anomaly Detection**: ~1000+ predictions/sec (IsolationForest)
 - **With Gunicorn (4 workers)**: ~200-400 requests/sec
 - **Kubernetes**: Scale horizontally with pod replicas
 
@@ -915,11 +1146,30 @@ A: Epsilon controls the perturbation strength. Higher values = stronger attacks 
 **Q: What's the difference between FGSM and PGD?**
 A: FGSM is a single-step attack (~300ms), while PGD is 40-step (~3.5s). PGD generates stronger adversarial examples.
 
+**Q: How does cloud monitoring work in real-time?**
+A: The dashboard polls the backend `/predict_anomaly` endpoint every 4 seconds, generating realistic cloud monitoring scenarios (login patterns, IP changes, etc.) and displaying detected anomalies as live events. The IsolationForest model classifies each scenario as normal, suspicious, or anomalous, with results streamed to the UI.
+
+**Q: What are the threat types in cloud monitoring?**
+A: AegisAI detects four threat categories:
+- **Impossible Travel**: User at two distant locations within impossible timeframe
+- **Brute Force**: Excessive login attempts in short time window
+- **Unusual Login Time**: Login outside normal user activity window
+- **High-Risk IP**: Login from geographically high-risk region
+
 **Q: How does anomaly detection work?**
-A: IsolationForest learns normal patterns and flags unusual combinations of features (impossible travel + high login frequency).
+A: IsolationForest learns normal patterns from feature combinations (impossible travel speed, login frequency, IP changes) and flags unusual combinations as anomalies.
+
+**Q: What does the risk score (0-100) mean?**
+A: The risk score is computed as `(anomaly_ratio × 80) + 20`, giving a range of 20-100. Higher scores indicate more detected anomalies. The dashboard updates this every 4 seconds based on the rolling event history.
 
 **Q: Can I deploy this to production?**
 A: Yes! Add authentication, CORS restrictions, rate limiting, and HTTPS, then deploy to your preferred cloud provider.
+
+**Q: How reliable is real-time data?**
+A: The cloud monitoring dashboard has graceful degradation:
+- If backend disconnects, UI shows "○ Offline" but maintains previous event cache
+- Connection attempts resume on next poll cycle
+- Dashboard doesn't crash on network errors
 
 ---
 

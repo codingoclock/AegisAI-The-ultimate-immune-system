@@ -54,13 +54,13 @@ export function RadialRiskCard({ score }: Props) {
         </ResponsiveContainer>
       </div>
       <div className="pointer-events-none -mt-24 flex flex-col items-center justify-center text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-foreground/60">
           Current Risk
         </p>
-        <p className="mt-1 text-3xl font-semibold text-slate-50">
+        <p className="mt-1 text-3xl font-semibold text-foreground">
           {score.toFixed(0)}
         </p>
-        <p className="mt-1 text-xs text-slate-300">{level} · last 15 minutes</p>
+        <p className="mt-1 text-xs text-foreground/70">{level} · last 15 minutes</p>
       </div>
     </div>
   );

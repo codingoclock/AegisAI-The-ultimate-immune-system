@@ -61,7 +61,7 @@ export function LiveEventFeed({ events }: Props) {
           return (
             <div
               key={event.id}
-              className="flex items-start gap-3 rounded-xl border border-slate-800/80 bg-slate-900/60 px-3 py-2.5"
+              className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface/60 px-3 py-2.5"
             >
               <div className="mt-1 flex flex-col items-center gap-1">
                 <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />

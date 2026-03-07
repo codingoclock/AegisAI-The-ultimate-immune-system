@@ -19,6 +19,9 @@
   --color-border-subtle: rgba(148, 163, 184, 0.4);
   --color-border-strong: rgba(148, 163, 184, 0.8);
 
+  --shadow-dark: rgba(15, 23, 42, 0.65);
+  --shadow-dark-inset: rgba(148, 163, 184, 0.25);
+
   --radius-lg: 1.25rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
@@ -34,6 +37,9 @@
 
   --color-border-subtle: rgba(148, 163, 184, 0.35);
   --color-border-strong: rgba(15, 23, 42, 0.9);
+
+  --shadow-dark: rgba(200, 200, 220, 0.3);
+  --shadow-dark-inset: rgba(200, 200, 220, 0.15);
 }
 
 @theme inline {
@@ -52,6 +58,9 @@
   --color-border-subtle: var(--color-border-subtle);
   --color-border-strong: var(--color-border-strong);
 
+  --shadow-dark: var(--shadow-dark);
+  --shadow-dark-inset: var(--shadow-dark-inset);
+
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --radius-full: var(--radius-full);
@@ -68,15 +77,15 @@ body {
   @apply bg-surface/70 border border-border-subtle backdrop-blur-xl;
   border-radius: var(--radius-xl);
   box-shadow:
-    0 18px 45px rgba(15, 23, 42, 0.65),
-    inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+    0 18px 45px var(--shadow-dark),
+    inset 0 0 0 1px var(--shadow-dark-inset);
 }
 
 .glass-panel-soft {
   @apply bg-surface-muted/70 border border-border-subtle backdrop-blur-xl;
   border-radius: var(--radius-lg);
   box-shadow:
-    0 14px 30px rgba(15, 23, 42, 0.5),
+    0 14px 30px var(--shadow-dark),
     inset 0 0 0 1px rgba(148, 163, 184, 0.2);
 }
 
@@ -110,4 +119,26 @@ body {
 .grid-no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Light mode color overrides for hardcoded Tailwind classes */
+[data-theme="light"] .text-slate-50,
+[data-theme="light"] .text-slate-100 {
+  @apply text-slate-900;
+}
+
+[data-theme="light"] .text-slate-200 {
+  @apply text-slate-800;
+}
+
+[data-theme="light"] .text-slate-300 {
+  @apply text-slate-700;
+}
+
+[data-theme="light"] .text-slate-400 {
+  @apply text-slate-600;
+}
+
+[data-theme="light"] .hover\:text-slate-50:hover {
+  @apply hover:text-slate-900;
 }

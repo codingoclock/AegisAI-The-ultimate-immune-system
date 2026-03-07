@@ -21,7 +21,7 @@ export function Sidebar() {
   return (
     <aside className="hidden h-screen w-72 flex-col border-r border-border-subtle bg-gradient-to-b from-background to-surface/60 px-5 py-6 lg:flex">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <Link href="/dashboard" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="gradient-border rounded-2xl bg-surface p-[1px]">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/90 via-primary-soft/70 to-sky-400/80 shadow-lg">
               <Shield className="h-5 w-5 text-white" />
@@ -75,7 +75,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-4 rounded-2xl border border-slate-700/70 bg-gradient-to-br from-surface-muted/90 via-surface/95 to-surface-muted/80 px-3.5 py-3 text-xs text-slate-300 shadow-[0_20px_45px_rgba(15,23,42,0.85)]">
+      <div className="mt-4 rounded-2xl border border-border-subtle bg-gradient-to-br from-surface-muted/90 via-surface/95 to-surface-muted/80 px-3.5 py-3 text-xs text-foreground shadow-lg">
         <p className="mb-1.5 font-medium text-slate-100">System Status</p>
         <div className="flex items-center justify-between text-[11px]">
           <div className="flex items-center gap-2">

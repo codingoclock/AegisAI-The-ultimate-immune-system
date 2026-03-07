@@ -1,7 +1,11 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+import json
+import uuid
+import asyncio
+from .logger import manager as log_manager, sync_log, log_info, log_error, log_warning
 import joblib
 import torch
 import torch.nn as nn
@@ -30,6 +34,9 @@ app.add_middleware(
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 MODEL_DIR = BASE_DIR / "models"
 
+# Log app startup (sync-safe)
+sync_log("INFO", "startup", "Initializing AegisAI API")
+
 # --- Global Variables: Models, Classifiers, and Attack Objects ---
 CIFAR10_CLASSES = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                   'dog', 'frog', 'horse', 'ship', 'truck']
@@ -42,6 +49,8 @@ def load_hardened_model() -> nn.Module:
     model.load_state_dict(torch.load(model_path, map_location=DEVICE))
     model.to(DEVICE)
     model.eval()
+    # log model loading
+    sync_log("INFO", "model", f"Loaded hardened model from {model_path}")
     return model
 
 hardened_model = load_hardened_model()
@@ -61,6 +70,7 @@ except (ModuleNotFoundError, AttributeError, FileNotFoundError) as e:
     import numpy as np
     dummy_data = np.array([[0, 1, 2], [0, 2, 3], [1, 1, 1], [0, 1, 1]])
     anomaly_model.fit(dummy_data)
+    sync_log("WARNING", "model", "Anomaly detector not found; created fallback IsolationForest")
 
 # Create ART classifier and attack objects once on startup
 art_classifier = PyTorchClassifier(
@@ -116,6 +126,21 @@ def preprocess_image(image_bytes: bytes) -> torch.Tensor:
     ])
     return transform(image).unsqueeze(0).to(DEVICE)
 
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    # Log incoming request metadata
+    client = request.client.host if request.client else "unknown"
+    path = request.url.path
+    method = request.method
+    await log_info("http", f"Request {method} {path}", {"client": client})
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        await log_error("http", f"Unhandled error {e}", {"path": path})
+        raise
+    return response
+
 def get_prediction_with_confidence(model: nn.Module, img_tensor: torch.Tensor) -> tuple:
     """
     Returns: (class_name: str, confidence: float, top_k: List[Dict])
@@ -156,6 +181,8 @@ async def inference_image(
     Returns:
         InferenceResponse with clean and adversarial predictions, confidences, and top-k
     """
+    # Log request start
+    await log_info("api", "inference_image called", {"attack_type": attack_type, "epsilon": epsilon})
     # Validate inputs
     attack_type = attack_type.upper()
     if attack_type not in ["FGSM", "PGD"]:
@@ -181,11 +208,12 @@ async def inference_image(
         # Clamp to valid range after attack
         adv_tensor = torch.clamp(adv_tensor, 0, 1)
     except Exception as e:
-        print(f"Attack generation failed: {e}, using original image")
+        await log_warning("api", f"Attack generation failed: {e}, using original image")
         adv_tensor = img_tensor
     
     # Get adversarial prediction
     adv_pred, adv_conf, _ = get_prediction_with_confidence(hardened_model, adv_tensor)
+    await log_info("api", "inference_image completed", {"clean": clean_pred, "adversarial": adv_pred})
     
     return {
         'clean_prediction': clean_pred,
@@ -202,16 +230,44 @@ def predict_anomaly(features: AnomalyFeatures) -> Dict[str, any]:
     sample = np.array([list(features.dict().values())]).reshape(1, -1)
     score = int(anomaly_model.predict(sample)[0])
     is_anomaly = (score == -1)
+    # Log anomaly prediction (synchronously)
+    sync_log("INFO", "api/predict_anomaly", f"Prediction: is_anomaly={is_anomaly}, model_score={score}")
     return {'is_anomaly': is_anomaly, 'model_score': score}
 
 @app.get('/health')
 async def health():
     """Health check endpoint"""
+    await log_info("api", "health_check" )
     return {
         'status': 'healthy',
         'model': 'hardened_resnet18',
         'device': str(DEVICE)
     }
+
+
+@app.websocket('/ws/logs')
+async def websocket_logs(websocket: WebSocket):
+    """WebSocket endpoint that streams logs to clients and sends recent logs on connect."""
+    # identify client
+    client_id = str(uuid.uuid4())
+    await websocket.accept()
+    # register client queue
+    q = await log_manager.register(client_id)
+    try:
+        # send recent logs on connect
+        recent = await log_manager.get_recent()
+        # send as JSON payload
+        await websocket.send_text(json.dumps({"type": "recent", "logs": recent}))
+
+        # continuously stream new logs from the per-client queue
+        while True:
+            rec = await q.get()
+            await websocket.send_text(json.dumps({"type": "log", "log": rec}))
+    except WebSocketDisconnect:
+        await log_manager.unregister(client_id)
+    except Exception as e:
+        await log_manager.unregister(client_id)
+        sync_log("ERROR", "ws", f"WebSocket error: {e}")
 
 # --- Main Application Runner ---
 if __name__ == "__main__":

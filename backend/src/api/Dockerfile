@@ -5,13 +5,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy the requirements file into the container at /app
-COPY requirements-docker.txt .
+COPY requirements.txt .
 
 # Use CPU wheels for PyTorch
 ENV PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
 
 # Install packages without hash checking
-RUN pip install --no-cache-dir --timeout=1200 -r requirements-docker.txt
+RUN pip install --no-cache-dir --timeout=1200 -r requirements.txt
 
 # Copy the rest of the application's code into the container
 COPY . .
