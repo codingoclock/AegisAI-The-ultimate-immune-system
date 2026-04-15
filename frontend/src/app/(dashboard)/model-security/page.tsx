@@ -8,7 +8,6 @@ import {
   SlidersHorizontal,
   Sparkles,
   UploadCloud,
-  AlertCircle,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -152,7 +151,7 @@ export default function ModelSecurityPage() {
           
           {error && (
             <div className="rounded-xl border border-red-500/50 bg-red-500/10 px-3 py-2 text-[11px] text-red-300 flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p>{error}</p>
             </div>
           )}
@@ -414,8 +413,8 @@ export default function ModelSecurityPage() {
                   }}
                   labelStyle={{ color: theme === "dark" ? "#e5e7eb" : "#020617", fontSize: 11 }}
                   itemStyle={{ color: theme === "dark" ? "#9f7aea" : "#6c3bff", fontSize: 11 }}
-                  formatter={(value: number) => [
-                    `${(value as number).toFixed(1)}%`,
+                  formatter={(value) => [
+                    `${Number(value ?? 0).toFixed(1)}%`,
                     "Probability",
                   ]}
                 />

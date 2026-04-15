@@ -89,7 +89,7 @@ export function TimeSeriesCard({
             }}
             labelStyle={{ color: tooltipTextColor, fontSize: 11 }}
             itemStyle={{ color: tooltipItemColor, fontSize: 11 }}
-            formatter={(value: number) => [`${value.toFixed(0)} ${metricLabel}`, "Value"]}
+            formatter={(value) => [`${Number(value ?? 0).toFixed(0)} ${metricLabel}`, "Value"]}
           />
           <Area
             type="monotone"

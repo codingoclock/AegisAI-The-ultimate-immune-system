@@ -1,5 +1,5 @@
 import { SectionHeader } from "@/components/ui/section-header";
-import { Brain, Boxes, Cloud, Shield, Workflow } from "lucide-react";
+import { ArrowRight, Brain, Cloud, Shield } from "lucide-react";
 
 const blocks = [
   {
@@ -11,7 +11,7 @@ const blocks = [
   },
   {
     title: "FastAPI Backend",
-    icon: <Workflow className="h-4 w-4" />,
+    icon: <ArrowRight className="h-4 w-4" />,
     description:
       "Orchestrates model inference, anomaly scoring, and routing of security signals into AegisAI.",
     bullets: ["FastAPI services", "Auth & RBAC", "Event fan‑out & queues"],

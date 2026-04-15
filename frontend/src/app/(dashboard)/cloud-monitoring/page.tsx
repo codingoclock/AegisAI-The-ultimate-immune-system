@@ -60,7 +60,11 @@ function anomalyToSecurityEvent(
   sample: ReturnType<typeof generateAnomalySample>
 ): SecurityEvent {
   const { actor, location, threatType, timestamp } = sample.metadata;
-  const severity = prediction.is_anomaly ? "anomaly" : "normal";
+  const severity: "normal" | "suspicious" | "anomaly" = prediction.is_anomaly
+    ? "anomaly"
+    : sample.login_frequency_1hr > 6 || sample.ip_change_count_24hr > 3
+    ? "suspicious"
+    : "normal";
   
   // Build threat-specific descriptions
   const descriptionMap: Record<string, string> = {
